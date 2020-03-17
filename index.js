@@ -208,23 +208,8 @@ PlacesInput.defaultProps = {
 
 const styles = StyleSheet.create({
     container: {
-        position: 'absolute',
-        top: 10,
-        left: 10,
-        right: 10,
-        zIndex: 1000,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-
-        elevation: 5,
     },
     input: {
-        height: 50,
         backgroundColor: '#fff',
         paddingHorizontal: 15,
     },
@@ -240,9 +225,6 @@ const styles = StyleSheet.create({
         zIndex: 10001,
     },
     placeIcon: {
-        position: 'absolute',
-        top: 10,
-        right: 15,
         color: 'rgba(0,0,0,0.3)',
     },
     placeText: {
