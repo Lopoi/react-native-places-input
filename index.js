@@ -25,8 +25,14 @@ class PlacesInput extends Component {
               <TextInput
                 placeholder={this.props.placeHolder}
                 style={[styles.input, this.props.stylesInput]}
-                onChangeText={query => this.setState({ query }, () => this.onPlaceSearch())}
-                value={this.state.query}
+                onChangeText={query => {
+                    if(this.props.onChangeText){
+                        this.props.onChangeText(query)
+                        this.onPlaceSearch()
+                    }else{
+                        this.setState({ query }, () => this.onPlaceSearch())}
+                }}
+                value={this.props.value?this.props.value:this.state.query}
                 onFocus={() => this.setState({ showList: true })}
                 onBlur={() => this.setState({ showList: false })}
                 {...this.props.textInputProps}
@@ -103,9 +109,10 @@ class PlacesInput extends Component {
     };
 
     fetchPlaces = async () => {
+        var query = this.props.value?this.props.value:this.state.query
         if (
-          !this.state.query ||
-          this.state.query.length < this.props.requiredCharactersBeforeSearch
+          !query ||
+          query.length < this.props.requiredCharactersBeforeSearch
         ) {
             return;
         }
@@ -138,29 +145,46 @@ class PlacesInput extends Component {
             const place = await fetch(
               `https://maps.googleapis.com/maps/api/place/details/json?placeid=${id}&key=${this.props.googleApiKey}&fields=${this.props.queryFields}&language=${this.props.language}`
             ).then(response => response.json());
-
-            return this.setState(
-              {
-                  showList: false,
-                  query:
-                    place &&
-                    place.result &&
-                    (place.result.formatted_address || place.result.name),
-              },
-              () => {
-                  return this.props.onSelect && this.props.onSelect(place);
-              }
-            );
+            if(this.props.onChangeText){
+                this.setState({
+                    showList:false,
+                },()=>{
+                    this.props.onChangeText(place && place.result && (place.result.formatted_address || place.result.name))
+                    return this.props.onSelect && this.props.onSelect(place);
+                })
+            }else{
+                return this.setState(
+                    {
+                        showList: false,
+                        query:
+                            place &&
+                            place.result &&
+                            (place.result.formatted_address || place.result.name),
+                    },
+                    () => {
+                        return this.props.onSelect && this.props.onSelect(place);
+                    }
+                );
+            }
         } catch (e) {
-            return this.setState(
-              {
-                  showList: false,
-                  query: passedPlace.description,
-              },
-              () => {
-                  return this.props.onSelect && this.props.onSelect(passedPlace);
-              }
-            );
+            if(this.props.onChangeText){
+                this.setState({
+                    showList:false,
+                },()=>{
+                    this.props.onChangeText(passedPlace.description)
+                    return this.props.onSelect && this.props.onSelect(place);
+                })
+            }else{
+                return this.setState(
+                    {
+                        showList: false,
+                        query: passedPlace.description,
+                    },
+                    () => {
+                        return this.props.onSelect && this.props.onSelect(passedPlace);
+                    }
+                );
+            }
         }
     };
 }
@@ -186,6 +210,8 @@ PlacesInput.propTypes = {
     iconInput: PropTypes.any,
     language: PropTypes.string,
     onSelect: PropTypes.func,
+    onChangeText: PropTypes.func,
+    value: PropTypes.string,
     requiredCharactersBeforeSearch: PropTypes.number,
     requiredTimeBeforeSearch: PropTypes.number,
 };
